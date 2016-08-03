@@ -1,0 +1,12 @@
+{
+  "name": "THREEJS Example",
+  "version": "1.0.0",
+  "description": "A Three.js Multiplayer Example",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ws": "1.0.1"
+  }
+}
