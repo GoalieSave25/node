@@ -10,7 +10,7 @@ var PREFIX = " [NODEJS] ";
 setInterval(main, 0.9*1000/60);
 
 var WebSocketServer = require('ws').Server;
-var wss = new WebSocketServer({ port: process.env.OPENSHIFT_NODEJS_PORT  || 8080 });
+var wss = new WebSocketServer({ ip: process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1", port: process.env.OPENSHIFT_NODEJS_PORT  || 8080 });
 
 console.log();
 log("Server Started");
