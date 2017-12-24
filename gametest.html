@@ -1,0 +1,263 @@
+<script src="gameIO.js"></script>
+<style>
+	* {
+		margin: 0;
+		padding: 0;
+	}
+	img {
+		visibility: hidden;
+		display: none;
+	}
+	#vignette {
+		pointer-events: none;
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		display: inline;
+		visibility: visible;
+		z-index: 2;
+	}
+</style>
+<img id="caveman" src="https://media.discordapp.net/attachments/325549215277252608/377872909106151426/Caveman.png">
+<img id="grass0" src="http://foes.io/images/sprites/ground/ground_1.png">
+<img id="grass1" src="http://foes.io/images/sprites/ground/ground_0.png">
+<img id="grass2" src="https://foes.io/images/sprites/flower/flower_0.png">
+<img id="grass3" src="https://foes.io/images/sprites/flower/flower_1.png">
+<img id="grass4" src="https://foes.io/images/sprites/flower/flower_2.png">
+<img id="grass5" src="http://foes.io/images/sprites/ground/ground_1.png">
+<img id="grass6" src="http://foes.io/images/sprites/ground/ground_0.png">
+<img id="grass7" src="https://foes.io/images/sprites/stone/stone_3.png">
+<img id="tree0" src="https://foes.io/images/sprites/tree/tree_0.png">
+<img id="tree1" src="https://foes.io/images/sprites/tree/tree_1.png">
+<img id="tree2" src="https://foes.io/images/sprites/tree/tree_2.png">
+<img id="tree3" src="https://foes.io/images/sprites/tree/tree_3.png">
+<img id="bush" src="https://foes.io/images/sprites/bush/bush_0.png">
+<img id="wall" src="https://foes.io/images/sprites/buildings/wall_1_0.png">
+<img id="road" src="https://foes.io/images/sprites/roads/road_1.png">
+<img id="head1" src="https://foes.io/images/sprites/player/head_1.png">
+<img id="hat1" src="https://foes.io/images/sprites/hats/hat_1.png">
+<img id="arms1" src="https://foes.io/images/sprites/player/arms_1_0.png">
+<img id="arms2" src="https://foes.io/images/sprites/player/arms_1_1.png">
+<img id="truck" src="https://foes.io/images/sprites/vehicles/vehicle_1_0.png">
+<img id="tank" src="https://foes.io/images/sprites/vehicles/vehicle_2_0.png">
+<img id="car" src="https://foes.io/images/sprites/vehicles/vehicle_3_0.png">
+<img id="bike" src="https://foes.io/images/sprites/vehicles/vehicle_4_0.png">
+<img id="bullet" src="https://foes.io/images/sprites//particles/particle_0.png">
+<img id="weapon" src="https://foes.io/images/sprites/weapons/weapon_15.png">
+<img id="vignette" src="http://foes.io/images/shaders/vignette.png">
+<div align="center" style="position: absolute; color: white; z-index: 2; font-family: Arial; font-size: 30px; width: 100%;">
+	<br>Press space to get in a car
+</div>
+<script>
+	var game = new gameIO();
+	window.onload = function() {
+		var mapsize = 2000;
+		var renderer = new game.renderer();
+		renderer.clearScreen = false;
+		renderer.ctx.imageSmoothingEnabled = false;
+		renderer.c.style.backgroundColor = "#768f5a";
+		var mouse = new game.mouse( renderer );
+		var scene = new game.scene();
+		scene.camera.ratio = 1.1;
+		var middle = new game.scene();
+		middle.camera = scene.camera;
+		var background = new game.scene();
+		background.camera = scene.camera;
+		function getElem( elem ) {
+			return document.getElementById( elem );
+		}
+		function randomPos( domain ) {
+			return 2 * ( Math.random() - 0.5 ) * domain;
+		}
+		for( var i = 0; i < 150*mapsize*mapsize/2000/2000; i++ ) {
+			var img = "grass" + Math.floor( Math.random() * 8 );
+			background.add( new game.image( document.getElementById( img ), randomPos( mapsize * 1.2 ), randomPos( mapsize * 1.2 ), 50, 50 ) );
+		}
+		for( var i = -10*mapsize/2000; i <= 10*mapsize/2000; i++ ) {
+			var img = new game.image( getElem("road"), 0, i * 256 * 2, 512, 512 );
+			img.rotation = Math.PI / 2;
+			background.add( img );
+		}
+		for( var i = -6*mapsize/2000; i <= 6*mapsize/2000; i++ ) {
+			background.add( new game.image( getElem("wall"), mapsize+500/3, i * 1000 / 3, 180/3, 1000/3 ) );
+			background.add( new game.image( getElem("wall"), -mapsize-500/3, i * 1000 / 3, 180/3, 1000/3 ) );
+			var newimg = new game.image( getElem("wall"), i * 1000 / 3, mapsize+500/3, 180/3, 1000/3 );
+			newimg.rotation = Math.PI / 2;
+			background.add( newimg );
+			var newimg = new game.image( getElem("wall"), i * 1000 / 3, -mapsize-500/3, 180/3, 1000/3 );
+			newimg.rotation = Math.PI / 2;
+			background.add( newimg );
+		}
+		function addTree( pos1, pos2, img ) {
+			scene.add( new game.image( document.getElementById( img ), pos1, pos2, 350, 350 ) );
+		}
+		var controls = new game.keyboard();
+		game.addType(
+			"player",
+			function(obj, packet) {
+				//obj.visual = new game.image( document.getElementById( "caveman" ), 0, 0, 200, 200 );
+				obj.visual = new game.image( getElem("head1"), 0, 0, 100, 100 );
+				obj.visual.add( new game.image( getElem("hat1"), -5, 0, 100, 100 ) );
+				obj.visual.addBelow( new game.image( getElem("arms1"), 50, 0, 120, 120 ) );
+				obj.shadow = new game.circle( 10, 0, 65, "#000" );
+				obj.shadow.opacity = 0.05;
+				obj.visual.addBelow( obj.shadow );
+				/*obj.weapon = new game.image( getElem("weapon"), 90, 0, 80, 80 );
+				obj.weapon.rotation = -Math.PI / 2;
+				obj.visual.add( obj.weapon );*/
+				obj.visual.size = 0.9;
+				obj.inVehicle = packet.inVehicle;
+				middle.add(obj.visual);
+			},
+			function() {},
+			function( obj, packet ) {
+				obj.inVehicle = packet.inVehicle;
+				if( obj.inVehicle == "tank" || obj.inVehicle == "truck" ) {
+					obj.visual.opacity = 0;
+				} else {
+					obj.visual.opacity = 1;
+				}
+				if( Math.abs( obj.old.rotation - obj.new.rotation ) > Math.PI ) {
+					if( obj.old.rotation > obj.new.rotation )
+						obj.old.rotation -= Math.PI * 2;
+					else
+						obj.old.rotation += Math.PI * 2;
+				}
+			}
+		);
+		game.addType(
+			"tree",
+			function(obj, packet) {
+				obj.visual = new game.image( getElem("tree"+(packet.variation)), 0, 0, 350, 350 );
+				scene.add( obj.visual );
+			},
+			function() {},
+			function( obj ) {
+			}
+		);
+		game.addType(
+			"bush",
+			function(obj, packet) {
+				obj.visual = new game.image( getElem("bush"), 0, 0, 200, 200 );
+				scene.add( obj.visual );
+			},
+			function() {},
+			function( obj ) {
+			}
+		);
+		game.addType(
+			"tank",
+			function(obj, packet) {
+				obj.visual = new game.image( getElem("tank"), 0, 0, 225, 351 );
+				background.add( obj.visual );
+			},
+			function() {},
+			function( obj ) {
+				if( Math.abs( obj.old.rotation - obj.new.rotation ) > Math.PI ) {
+					if( obj.old.rotation > obj.new.rotation )
+						obj.old.rotation -= Math.PI * 2;
+					else
+						obj.old.rotation += Math.PI * 2;
+				}
+			}
+		);
+		game.addType(
+			"car",
+			function(obj, packet) {
+				obj.visual = new game.image( getElem("car"), 0, 0, 225, 351 );
+				background.add( obj.visual );
+			},
+			function() {},
+			function( obj ) {
+				if( Math.abs( obj.old.rotation - obj.new.rotation ) > Math.PI ) {
+					if( obj.old.rotation > obj.new.rotation )
+						obj.old.rotation -= Math.PI * 2;
+					else
+						obj.old.rotation += Math.PI * 2;
+				}
+			}
+		);
+		game.addType(
+			"bike",
+			function(obj, packet) {
+				obj.visual = new game.image( getElem("bike"), 0, 0, 131, 247 );
+				background.add( obj.visual );
+			},
+			function() {},
+			function( obj ) {
+				if( Math.abs( obj.old.rotation - obj.new.rotation ) > Math.PI ) {
+					if( obj.old.rotation > obj.new.rotation )
+						obj.old.rotation -= Math.PI * 2;
+					else
+						obj.old.rotation += Math.PI * 2;
+				}
+			}
+		);
+		game.addType(
+			"truck",
+			function(obj, packet) {
+				obj.visual = new game.image( getElem("truck"), 0, 0, 253, 522 );
+				background.add( obj.visual );
+			},
+			function() {},
+			function( obj ) {
+				if( Math.abs( obj.old.rotation - obj.new.rotation ) > Math.PI ) {
+					if( obj.old.rotation > obj.new.rotation )
+						obj.old.rotation -= Math.PI * 2;
+					else
+						obj.old.rotation += Math.PI * 2;
+				}
+			}
+		);
+		game.addType(
+			"bullet",
+			function(obj, packet) {
+				obj.visual = new game.image( getElem("bullet"), 0, 0, 32, 32 );
+				background.add( obj.visual );
+			},
+			function() {},
+			function( obj ) {
+				if( Math.abs( obj.old.rotation - obj.new.rotation ) > Math.PI ) {
+					if( obj.old.rotation > obj.new.rotation )
+						obj.old.rotation -= Math.PI * 2;
+					else
+						obj.old.rotation += Math.PI * 2;
+				}
+			}
+		);
+		game.createSocket("wss://twojsexample-goaliesave25.c9users.io:8080");
+
+		function main() {
+			controls.changedKeys.forEach(function(key) {
+				game.currentPackets.push({
+					type: "updateControls",
+					object: {
+						key: key,
+						state: controls[key]
+					}
+				});
+			});
+			controls.changedKeys = [];
+			if( mouse.changed ) {
+				game.currentPackets.push( { type: "mouse", clicking: mouse.clicking } );
+				mouse.changed = false;
+			}
+			game.update();
+			scene.camera.position = new game.Vector2( game.me.visual.position.x + mouse.x / 6, game.me.visual.position.y + mouse.y / 6 );
+			if( !game.me.inVehicle )
+				game.me.visual.rotation = -Math.atan2( mouse.x, mouse.y ) + Math.PI / 2;
+			renderer.clear();
+			renderer.render( background );
+			renderer.render( middle )
+			renderer.render( scene );
+			requestFrame( main );
+		}
+		main();
+		setInterval( function() {
+			if( !game.me.inVehicle && mouse.moved ) {
+				game.currentPackets.push( { type: "setRotation", object: { angle: game.me.visual.rotation } } );
+				mouse.moved = false;
+			}
+		}, 100 );
+	}
+</script>
